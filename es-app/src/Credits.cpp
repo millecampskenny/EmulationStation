@@ -27,8 +27,8 @@ int getCredit()
 }
 void incrementCredit()
 {
-    int nombre = getCredit(); // Lire le nombre actuel
-    nombre++;                 // Incrémenter le nombre
+    int nombre = getCredit();                                                             // Lire le nombre actuel
+    nombre++;                                                                             // Incrémenter le nombre
     std::ofstream fichier(SystemData::getCreditsFile(), std::ios::out | std::ios::trunc); // Ouvre le fichier en écriture (crée le fichier si nécessaire)
     if (!fichier.is_open())
     {

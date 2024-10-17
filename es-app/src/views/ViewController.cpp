@@ -17,6 +17,7 @@
 #include "Settings.h"
 #include "SystemData.h"
 #include "Window.h"
+#include "Credits.h"
 
 ViewController* ViewController::sInstance = NULL;
 
@@ -441,6 +442,12 @@ bool ViewController::input(InputConfig* config, Input input)
 	if(UIModeController::getInstance()->listen(config, input))  // check if UI mode has changed due to passphrase completion
 	{
 		return true;
+	}
+
+	if(config->isMappedTo("select", input) && input.value != 0) 
+	{
+		incrementCredit();
+		this->reloadAll();
 	}
 
 	if(mCurrentView)
