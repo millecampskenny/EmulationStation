@@ -1,35 +1,38 @@
 #include "views/gamelist/DetailedGameListView.h"
 
+#include <string>
+
 #include "animations/LambdaAnimation.h"
 #include "views/ViewController.h"
+#include "Credits.h"
 
-DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
-	BasicGameListView(window, root),
-	mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window),
-	mThumbnail(window),
-	mMarquee(window),
-	mImage(window),
+DetailedGameListView::DetailedGameListView(Window *window, FileData *root) : BasicGameListView(window, root),
+																			 mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window), mCredits(window),
+																			 mThumbnail(window),
+																			 mMarquee(window),
+																			 mImage(window),
 
-	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
-	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
+																			 mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
+																			 mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
 
-	mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window),
-	mGenre(window), mPlayers(window), mLastPlayed(window), mPlayCount(window),
-	mName(window)
+																			 mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window),
+																			 mGenre(window), mPlayers(window), mLastPlayed(window), mPlayCount(window),
+																			 mName(window)
 {
-	//mHeaderImage.setPosition(mSize.x() * 0.25f, 0);
+	// mHeaderImage.setPosition(mSize.x() * 0.25f, 0);
 
 	const float padding = 0.01f;
 
 	mList.setPosition(mSize.x() * (0.50f + padding), mList.getPosition().y());
 	mList.setSize(mSize.x() * (0.50f - padding), mList.getSize().y());
-	mList.setAlignment(TextListComponent<FileData*>::ALIGN_LEFT);
-	mList.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
+	mList.setAlignment(TextListComponent<FileData *>::ALIGN_LEFT);
+	mList.setCursorChangedCallback([&](const CursorState & /*state*/)
+								   { updateInfoPanel(); });
 
 	// Image
 	mImage.setOrigin(0.5f, 0.5f);
 	mImage.setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
-	mImage.setMaxSize(mSize.x() * (0.50f - 2*padding), mSize.y() * 0.4f);
+	mImage.setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
 	mImage.setDefaultZIndex(30);
 	addChild(&mImage);
 
@@ -86,7 +89,7 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 	addChild(&mName);
 
 	mDescContainer.setPosition(mSize.x() * padding, mSize.y() * 0.65f);
-	mDescContainer.setSize(mSize.x() * (0.50f - 2*padding), mSize.y() - mDescContainer.getPosition().y());
+	mDescContainer.setSize(mSize.x() * (0.50f - 2 * padding), mSize.y() - mDescContainer.getPosition().y());
 	mDescContainer.setAutoScroll(true);
 	mDescContainer.setDefaultZIndex(40);
 	addChild(&mDescContainer);
@@ -95,13 +98,19 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 	mDescription.setSize(mDescContainer.getSize().x(), 0);
 	mDescContainer.addChild(&mDescription);
 
+	mCredits.setPosition(mSize.x(), mSize.y());
+	mCredits.setDefaultZIndex(40);
+	mCredits.setColor(0x86AA55FF);
+	mCredits.setFont(Font::get(FONT_SIZE_LARGE));
+	mCredits.setHorizontalAlignment(ALIGN_LEFT);
+	addChild(&mCredits);
 
 	initMDLabels();
 	initMDValues();
 	updateInfoPanel();
 }
 
-void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
+void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData> &theme)
 {
 	BasicGameListView::onThemeChanged(theme);
 
@@ -111,29 +120,28 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	mImage.applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION | VISIBLE);
 	mName.applyTheme(theme, getName(), "md_name", ALL);
 
-	initMDLabels();
-	std::vector<TextComponent*> labels = getMDLabels();
-	assert(labels.size() == 8);
-	const char* lblElements[8] = {
-		"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher",
-		"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"
-	};
+	mCredits.applyTheme(theme, getName(), "md_credits", ALL);
 
-	for(unsigned int i = 0; i < labels.size(); i++)
+	initMDLabels();
+	std::vector<TextComponent *> labels = getMDLabels();
+	assert(labels.size() == 8);
+	const char *lblElements[8] = {
+		"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher",
+		"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"};
+
+	for (unsigned int i = 0; i < labels.size(); i++)
 	{
 		labels[i]->applyTheme(theme, getName(), lblElements[i], ALL);
 	}
 
-
 	initMDValues();
-	std::vector<GuiComponent*> values = getMDValues();
+	std::vector<GuiComponent *> values = getMDValues();
 	assert(values.size() == 8);
-	const char* valElements[8] = {
+	const char *valElements[8] = {
 		"md_rating", "md_releasedate", "md_developer", "md_publisher",
-		"md_genre", "md_players", "md_lastplayed", "md_playcount"
-	};
+		"md_genre", "md_players", "md_lastplayed", "md_playcount"};
 
-	for(unsigned int i = 0; i < values.size(); i++)
+	for (unsigned int i = 0; i < values.size(); i++)
 	{
 		values[i]->applyTheme(theme, getName(), valElements[i], ALL ^ ThemeFlags::TEXT);
 	}
@@ -147,7 +155,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 
 void DetailedGameListView::initMDLabels()
 {
-	std::vector<TextComponent*> components = getMDLabels();
+	std::vector<TextComponent *> components = getMDLabels();
 
 	const unsigned int colCount = 2;
 	const unsigned int rowCount = (int)(components.size() / 2);
@@ -157,16 +165,18 @@ void DetailedGameListView::initMDLabels()
 	const float colSize = (mSize.x() * 0.48f) / colCount;
 	const float rowPadding = 0.01f * mSize.y();
 
-	for(unsigned int i = 0; i < components.size(); i++)
+	for (unsigned int i = 0; i < components.size(); i++)
 	{
 		const unsigned int row = i % rowCount;
 		Vector3f pos(0.0f, 0.0f, 0.0f);
-		if(row == 0)
+		if (row == 0)
 		{
 			pos = start + Vector3f(colSize * (i / rowCount), 0, 0);
-		}else{
+		}
+		else
+		{
 			// work from the last component
-			GuiComponent* lc = components[i-1];
+			GuiComponent *lc = components[i - 1];
 			pos = lc->getPosition() + Vector3f(0, lc->getSize().y() + rowPadding, 0);
 		}
 
@@ -178,8 +188,8 @@ void DetailedGameListView::initMDLabels()
 
 void DetailedGameListView::initMDValues()
 {
-	std::vector<TextComponent*> labels = getMDLabels();
-	std::vector<GuiComponent*> values = getMDValues();
+	std::vector<TextComponent *> labels = getMDLabels();
+	std::vector<GuiComponent *> values = getMDValues();
 
 	std::shared_ptr<Font> defaultFont = Font::get(FONT_SIZE_SMALL);
 	mRating.setSize(defaultFont->getHeight() * 5.0f, (float)defaultFont->getHeight());
@@ -194,7 +204,7 @@ void DetailedGameListView::initMDValues()
 	float bottom = 0.0f;
 
 	const float colSize = (mSize.x() * 0.48f) / 2;
-	for(unsigned int i = 0; i < labels.size(); i++)
+	for (unsigned int i = 0; i < labels.size(); i++)
 	{
 		const float heightDiff = (labels[i]->getSize().y() - values[i]->getSize().y()) / 2;
 		values[i]->setPosition(labels[i]->getPosition() + Vector3f(labels[i]->getSize().x(), heightDiff, 0));
@@ -202,7 +212,7 @@ void DetailedGameListView::initMDValues()
 		values[i]->setDefaultZIndex(40);
 
 		float testBot = values[i]->getPosition().y() + values[i]->getSize().y();
-		if(testBot > bottom)
+		if (testBot > bottom)
 			bottom = testBot;
 	}
 
@@ -212,15 +222,17 @@ void DetailedGameListView::initMDValues()
 
 void DetailedGameListView::updateInfoPanel()
 {
-	FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
+	FileData *file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
 
 	bool fadingOut;
-	if(file == NULL)
+	if (file == NULL)
 	{
-		//mImage.setImage("");
-		//mDescription.setText("");
+		// mImage.setImage("");
+		// mDescription.setText("");
 		fadingOut = true;
-	}else{
+	}
+	else
+	{
 		mThumbnail.setImage(file->getThumbnailPath());
 		mMarquee.setImage(file->getMarqueePath());
 		mImage.setImage(file->getImagePath());
@@ -235,7 +247,9 @@ void DetailedGameListView::updateInfoPanel()
 		mPlayers.setValue(file->metadata.get("players"));
 		mName.setValue(file->metadata.get("name"));
 
-		if(file->getType() == GAME)
+		mCredits.setValue("Credit: " + std::to_string(getCredit()));
+
+		if (file->getType() == GAME)
 		{
 			mLastPlayed.setValue(file->metadata.get("lastplayed"));
 			mPlayCount.setValue(file->metadata.get("playcount"));
@@ -244,46 +258,47 @@ void DetailedGameListView::updateInfoPanel()
 		fadingOut = false;
 	}
 
-	std::vector<GuiComponent*> comps = getMDValues();
+	std::vector<GuiComponent *> comps = getMDValues();
 	comps.push_back(&mThumbnail);
 	comps.push_back(&mMarquee);
 	comps.push_back(&mImage);
 	comps.push_back(&mDescription);
+	comps.push_back(&mCredits);
 	comps.push_back(&mName);
-	std::vector<TextComponent*> labels = getMDLabels();
+	std::vector<TextComponent *> labels = getMDLabels();
 	comps.insert(comps.cend(), labels.cbegin(), labels.cend());
 
-	for(auto it = comps.cbegin(); it != comps.cend(); it++)
+	for (auto it = comps.cbegin(); it != comps.cend(); it++)
 	{
-		GuiComponent* comp = *it;
+		GuiComponent *comp = *it;
 		// an animation is playing
 		//   then animate if reverse != fadingOut
 		// an animation is not playing
 		//   then animate if opacity != our target opacity
-		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
+		if ((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
 			(!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
 		{
 			auto func = [comp](float t)
 			{
-				comp->setOpacity((unsigned char)(Math::lerp(0.0f, 1.0f, t)*255));
+				comp->setOpacity((unsigned char)(Math::lerp(0.0f, 1.0f, t) * 255));
 			};
 			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
 		}
 	}
 }
 
-void DetailedGameListView::launch(FileData* game)
+void DetailedGameListView::launch(FileData *game)
 {
 	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
-	if(mImage.hasImage())
+	if (mImage.hasImage())
 		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);
 
 	ViewController::get()->launch(game, target);
 }
 
-std::vector<TextComponent*> DetailedGameListView::getMDLabels()
+std::vector<TextComponent *> DetailedGameListView::getMDLabels()
 {
-	std::vector<TextComponent*> ret;
+	std::vector<TextComponent *> ret;
 	ret.push_back(&mLblRating);
 	ret.push_back(&mLblReleaseDate);
 	ret.push_back(&mLblDeveloper);
@@ -295,9 +310,9 @@ std::vector<TextComponent*> DetailedGameListView::getMDLabels()
 	return ret;
 }
 
-std::vector<GuiComponent*> DetailedGameListView::getMDValues()
+std::vector<GuiComponent *> DetailedGameListView::getMDValues()
 {
-	std::vector<GuiComponent*> ret;
+	std::vector<GuiComponent *> ret;
 	ret.push_back(&mRating);
 	ret.push_back(&mReleaseDate);
 	ret.push_back(&mDeveloper);
@@ -309,7 +324,8 @@ std::vector<GuiComponent*> DetailedGameListView::getMDValues()
 	return ret;
 }
 
-void DetailedGameListView::onFocusLost() {
+void DetailedGameListView::onFocusLost()
+{
 	mDescContainer.reset();
 	mList.stopScrolling(true);
 }

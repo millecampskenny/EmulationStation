@@ -7,16 +7,17 @@
 #include "components/ScrollableContainer.h"
 #include "views/gamelist/BasicGameListView.h"
 
+
 class DetailedGameListView : public BasicGameListView
 {
 public:
-	DetailedGameListView(Window* window, FileData* root);
+	DetailedGameListView(Window *window, FileData *root);
 
-	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
+	virtual void onThemeChanged(const std::shared_ptr<ThemeData> &theme) override;
 
-	virtual const char* getName() const override { return "detailed"; }
+	virtual const char *getName() const override { return "detailed"; }
 
-	virtual void launch(FileData* game) override;
+	virtual void launch(FileData *game) override;
 
 	void onFocusLost() override;
 
@@ -42,11 +43,13 @@ private:
 	TextComponent mPlayCount;
 	TextComponent mName;
 
-	std::vector<TextComponent*> getMDLabels();
-	std::vector<GuiComponent*> getMDValues();
+	std::vector<TextComponent *> getMDLabels();
+	std::vector<GuiComponent *> getMDValues();
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;
+
+	TextComponent mCredits;
 };
 
 #endif // ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H

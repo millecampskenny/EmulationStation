@@ -6,6 +6,7 @@
 #include "CollectionSystemManager.h"
 #include "Settings.h"
 #include "SystemData.h"
+#include "Credits.h"
 #ifdef _OMX_
 #include "components/VideoPlayerComponent.h"
 #endif
