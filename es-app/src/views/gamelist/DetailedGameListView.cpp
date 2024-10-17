@@ -289,6 +289,13 @@ void DetailedGameListView::updateInfoPanel()
 
 void DetailedGameListView::launch(FileData *game)
 {
+	if(getCredit() == 0){
+		return;
+	} else {
+		decrementCredit();
+		ViewController::get()->reloadAll();
+	}
+
 	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if (mImage.hasImage())
 		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);

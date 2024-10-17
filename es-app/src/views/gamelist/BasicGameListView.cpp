@@ -6,6 +6,7 @@
 #include "CollectionSystemManager.h"
 #include "Settings.h"
 #include "SystemData.h"
+#include "Credits.h"
 
 BasicGameListView::BasicGameListView(Window* window, FileData* root)
 	: ISimpleGameListView(window, root), mList(window)
@@ -127,6 +128,12 @@ std::string BasicGameListView::getQuickSystemSelectLeftButton()
 
 void BasicGameListView::launch(FileData* game)
 {
+	if(getCredit() == 0){
+		return;
+	} else {
+		decrementCredit();
+		ViewController::get()->reloadAll();
+	}
 	ViewController::get()->launch(game);
 }
 

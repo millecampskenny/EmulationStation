@@ -385,6 +385,12 @@ void GridGameListView::addPlaceholder()
 
 void GridGameListView::launch(FileData* game)
 {
+	if(getCredit() == 0){
+		return;
+	} else {
+		decrementCredit();
+		ViewController::get()->reloadAll();
+	}
 	float screenWidth = (float) Renderer::getScreenWidth();
 	float screenHeight = (float) Renderer::getScreenHeight();
 
