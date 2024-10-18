@@ -7,8 +7,9 @@
 #include "Settings.h"
 #include "SystemData.h"
 #include "Credits.h"
+#include "guis/GuiCountUser.h"
 
-BasicGameListView::BasicGameListView(Window* window, FileData* root)
+BasicGameListView::BasicGameListView(Window *window, FileData *root)
 	: ISimpleGameListView(window, root), mList(window)
 {
 	mList.setSize(mSize.x(), mSize.y() * 0.8f);
@@ -19,7 +20,7 @@ BasicGameListView::BasicGameListView(Window* window, FileData* root)
 	populateList(root->getChildrenListToDisplay());
 }
 
-void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
+void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData> &theme)
 {
 	ISimpleGameListView::onThemeChanged(theme);
 	using namespace ThemeFlags;
@@ -28,9 +29,9 @@ void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	sortChildren();
 }
 
-void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
+void BasicGameListView::onFileChanged(FileData *file, FileChangeType change)
 {
-	if(change == FILE_METADATA_CHANGED)
+	if (change == FILE_METADATA_CHANGED)
 	{
 		// might switch to a detailed view
 		ViewController::get()->reloadGameListView(this);
@@ -40,13 +41,13 @@ void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 	ISimpleGameListView::onFileChanged(file, change);
 }
 
-void BasicGameListView::populateList(const std::vector<FileData*>& files)
+void BasicGameListView::populateList(const std::vector<FileData *> &files)
 {
 	mList.clear();
 	mHeaderText.setText(mRoot->getSystem()->getFullName());
 	if (files.size() > 0)
 	{
-		for(auto it = files.cbegin(); it != files.cend(); it++)
+		for (auto it = files.cbegin(); it != files.cend(); it++)
 		{
 			mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
 		}
@@ -57,18 +58,18 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 	}
 }
 
-FileData* BasicGameListView::getCursor()
+FileData *BasicGameListView::getCursor()
 {
 	return mList.getSelected();
 }
 
-void BasicGameListView::setCursor(FileData* cursor, bool refreshListCursorPos)
+void BasicGameListView::setCursor(FileData *cursor, bool refreshListCursorPos)
 {
 	if (refreshListCursorPos)
 		setViewportTop(mList.REFRESH_LIST_CURSOR_POS);
 
 	bool notInList = !mList.setCursor(cursor);
-	if(!refreshListCursorPos && notInList && !cursor->isPlaceHolder())
+	if (!refreshListCursorPos && notInList && !cursor->isPlaceHolder())
 	{
 		populateList(cursor->getParent()->getChildrenListToDisplay());
 		// this extra call is needed iff a system has games organized in folders
@@ -77,19 +78,19 @@ void BasicGameListView::setCursor(FileData* cursor, bool refreshListCursorPos)
 			mList.setCursor(cursor);
 
 		// update our cursor stack in case our cursor just got set to some folder we weren't in before
-		if(mCursorStack.empty() || mCursorStack.top() != cursor->getParent())
+		if (mCursorStack.empty() || mCursorStack.top() != cursor->getParent())
 		{
-			std::stack<FileData*> tmp;
-			FileData* ptr = cursor->getParent();
-			while(ptr && ptr != mRoot)
+			std::stack<FileData *> tmp;
+			FileData *ptr = cursor->getParent();
+			while (ptr && ptr != mRoot)
 			{
 				tmp.push(ptr);
 				ptr = ptr->getParent();
 			}
 
 			// flip the stack and put it in mCursorStack
-			mCursorStack = std::stack<FileData*>();
-			while(!tmp.empty())
+			mCursorStack = std::stack<FileData *>();
+			while (!tmp.empty())
 			{
 				mCursorStack.push(tmp.top());
 				tmp.pop();
@@ -103,7 +104,6 @@ void BasicGameListView::setViewportTop(int index)
 	mList.setViewportTop(index);
 }
 
-
 int BasicGameListView::getViewportTop()
 {
 	return mList.getViewportTop();
@@ -112,7 +112,7 @@ int BasicGameListView::getViewportTop()
 void BasicGameListView::addPlaceholder()
 {
 	// empty list - add a placeholder
-	FileData* placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem()->getSystemEnvData(), this->mRoot->getSystem());
+	FileData *placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem()->getSystemEnvData(), this->mRoot->getSystem());
 	mList.add(placeholder->getName(), placeholder, (placeholder->getType() == PLACEHOLDER));
 }
 
@@ -126,14 +126,44 @@ std::string BasicGameListView::getQuickSystemSelectLeftButton()
 	return "left";
 }
 
-void BasicGameListView::launch(FileData* game)
+void BasicGameListView::launch(FileData *game)
 {
-	if(getCredit() == 0){
-		return;
-	} else {
-		decrementCredit();
-		ViewController::get()->reloadAll();
+	FileData *file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
+	int credit = getCredit();
+	int countPlayer = 1;
+	try
+	{
+		if (file != NULL)
+			countPlayer = std::stoi(file->metadata.get("players"));
 	}
+	catch (const std::invalid_argument &e)
+	{
+		countPlayer = 1;
+	}
+	catch (const std::out_of_range &e)
+	{
+		countPlayer = 1;
+	}
+	if (credit == 0)
+	{
+		return;
+	}
+
+	if (credit == 1 || countPlayer == 1)
+	{
+		launchGame(1, game);
+	}
+	else
+	{
+		mWindow->pushGui(new GuiCountUser(mWindow, credit, countPlayer, game, [this, game](int countGame)
+										  { launchGame(countGame, game); }));
+	}
+}
+
+void BasicGameListView::launchGame(int countCredits, FileData *game)
+{
+	decrementCredit(countCredits);
+	ViewController::get()->reloadAll();
 	ViewController::get()->launch(game);
 }
 
@@ -141,13 +171,13 @@ void BasicGameListView::remove(FileData *game, bool deleteFile, bool refreshView
 {
 	if (deleteFile)
 	{
-		Utils::FileSystem::removeFile(game->getPath());  // actually delete the file on the filesystem
+		Utils::FileSystem::removeFile(game->getPath()); // actually delete the file on the filesystem
 
 		// we want to delete related/scraped files, but check first if resources are shared with another game
-		bool keepVideo     = game->getVideoPath().empty();
-		bool keepMarquee   = game->getMarqueePath().empty();
+		bool keepVideo = game->getVideoPath().empty();
+		bool keepMarquee = game->getMarqueePath().empty();
 		bool keepThumbnail = game->getThumbnailPath().empty();
-		bool keepImage     = game->getImagePath().empty();
+		bool keepImage = game->getImagePath().empty();
 
 		for (auto system : SystemData::sSystemVector)
 		{
@@ -158,7 +188,8 @@ void BasicGameListView::remove(FileData *game, bool deleteFile, bool refreshView
 			if (!system->isGameSystem() || system->isCollection())
 				continue;
 
-			for (auto entry : system->getRootFolder()->getChildren()) {
+			for (auto entry : system->getRootFolder()->getChildren())
+			{
 				if (entry == game) // skip the game's own entry
 					continue;
 
@@ -187,10 +218,10 @@ void BasicGameListView::remove(FileData *game, bool deleteFile, bool refreshView
 		if (!keepMarquee)
 			Utils::FileSystem::removeFile(game->getMarqueePath());
 	}
-	FileData* parent = game->getParent();
-	if (getCursor() == game)                     // Select next element in list, or prev if none
+	FileData *parent = game->getParent();
+	if (getCursor() == game) // Select next element in list, or prev if none
 	{
-		std::vector<FileData*> siblings = parent->getChildrenListToDisplay();
+		std::vector<FileData *> siblings = parent->getChildrenListToDisplay();
 		auto gameIter = std::find(siblings.cbegin(), siblings.cend(), game);
 		unsigned int gamePos = (int)std::distance(siblings.cbegin(), gameIter);
 		if (gameIter != siblings.cend())
@@ -198,35 +229,37 @@ void BasicGameListView::remove(FileData *game, bool deleteFile, bool refreshView
 			if ((gamePos + 1) < siblings.size())
 			{
 				setCursor(siblings.at(gamePos + 1));
-			} else if (gamePos > 1) {
+			}
+			else if (gamePos > 1)
+			{
 				setCursor(siblings.at(gamePos - 1));
 			}
 		}
 	}
 	mList.remove(game);
-	if(mList.size() == 0)
+	if (mList.size() == 0)
 	{
 		addPlaceholder();
 	}
-	delete game;                                 // remove before repopulating (removes from parent)
-	if(refreshView)
-		onFileChanged(parent, FILE_REMOVED);     // update the view, with game removed
+	delete game; // remove before repopulating (removes from parent)
+	if (refreshView)
+		onFileChanged(parent, FILE_REMOVED); // update the view, with game removed
 }
 
 std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 
-	if(Settings::getInstance()->getBool("QuickSystemSelect"))
+	if (Settings::getInstance()->getBool("QuickSystemSelect"))
 		prompts.push_back(HelpPrompt("left/right", "system"));
 	prompts.push_back(HelpPrompt("up/down", "choose"));
 	prompts.push_back(HelpPrompt("a", "launch"));
 	prompts.push_back(HelpPrompt("b", "back"));
-	if(!UIModeController::getInstance()->isUIModeKid())
+	if (!UIModeController::getInstance()->isUIModeKid())
 		prompts.push_back(HelpPrompt("select", "options"));
-	if(mRoot->getSystem()->isGameSystem())
+	if (mRoot->getSystem()->isGameSystem())
 		prompts.push_back(HelpPrompt("x", "random"));
-	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
+	if (mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{
 		std::string prompt = CollectionSystemManager::get()->getEditingCollection();
 		prompts.push_back(HelpPrompt("y", prompt));
@@ -234,6 +267,7 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	return prompts;
 }
 
-void BasicGameListView::onFocusLost() {
+void BasicGameListView::onFocusLost()
+{
 	mList.stopScrolling(true);
 }

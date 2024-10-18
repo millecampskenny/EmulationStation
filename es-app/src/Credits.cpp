@@ -39,13 +39,13 @@ void incrementCredit()
     fichier.close();   // Ferme le fichier après l'écriture
     std::cout << "Le nombre a été incrémenté et enregistré dans " << SystemData::getCreditsFile() << std::endl;
 }
-void decrementCredit()
+void decrementCredit(int countCredit)
 {
     int nombre = getCredit(); // Lire le nombre actuel
     // Décrémenter seulement si le nombre est supérieur à 0
     if (nombre > 0)
     {
-        nombre--;
+        nombre -= countCredit;
     }
     // Ouvre le fichier en écriture, et s'il n'existe pas, il sera créé
     std::ofstream fichier(SystemData::getCreditsFile(), std::ios::out | std::ios::trunc);

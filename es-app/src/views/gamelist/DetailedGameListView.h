@@ -7,7 +7,6 @@
 #include "components/ScrollableContainer.h"
 #include "views/gamelist/BasicGameListView.h"
 
-
 class DetailedGameListView : public BasicGameListView
 {
 public:
@@ -20,6 +19,9 @@ public:
 	virtual void launch(FileData *game) override;
 
 	void onFocusLost() override;
+
+protected:
+	virtual void launchGame(int countCredits, FileData *game) override;
 
 private:
 	void updateInfoPanel();

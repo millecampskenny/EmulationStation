@@ -44,6 +44,8 @@ protected:
 	std::vector<GuiComponent*> mThemeExtras;
 
 	std::stack<FileData*> mCursorStack;
+	virtual void launchGame(int countCredits, FileData* game) override = 0;
+
 
 private:
 	int getPressCountInDuration();

@@ -1,3 +1,3 @@
 int getCredit();
 void incrementCredit();
-void decrementCredit();
+void decrementCredit(int countCredit);

@@ -5,6 +5,7 @@
 #include "animations/LambdaAnimation.h"
 #include "views/ViewController.h"
 #include "Credits.h"
+#include "guis/GuiCountUser.h"
 
 DetailedGameListView::DetailedGameListView(Window *window, FileData *root) : BasicGameListView(window, root),
 																			 mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window), mCredits(window),
@@ -289,17 +290,46 @@ void DetailedGameListView::updateInfoPanel()
 
 void DetailedGameListView::launch(FileData *game)
 {
-	if(getCredit() == 0){
+	FileData *file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
+	int credit = getCredit();
+	int countPlayer = 1;
+	try
+	{
+		if (file != NULL)
+			countPlayer = std::stoi(file->metadata.get("players"));
+	}
+	catch (const std::invalid_argument &e)
+	{
+		countPlayer = 1;
+	}
+	catch (const std::out_of_range &e)
+	{
+		countPlayer = 1;
+	}
+	if (credit == 0)
+	{
 		return;
-	} else {
-		decrementCredit();
-		ViewController::get()->reloadAll();
 	}
 
+	if (credit == 1 || countPlayer == 1)
+	{
+		launchGame(1, game);
+	}
+	else
+	{
+		mWindow->pushGui(new GuiCountUser(mWindow, credit, countPlayer, game, [this, game](int countGame)
+										  { launchGame(countGame, game); }));
+	}
+}
+
+void DetailedGameListView::launchGame(int countCredits, FileData *game)
+{
+	decrementCredit(countCredits);
+
+	ViewController::get()->reloadAll();
 	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if (mImage.hasImage())
 		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);
-
 	ViewController::get()->launch(game, target);
 }
 

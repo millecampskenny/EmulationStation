@@ -12,24 +12,24 @@
 class GridGameListView : public ISimpleGameListView
 {
 public:
-	GridGameListView(Window* window, FileData* root);
+	GridGameListView(Window *window, FileData *root);
 	virtual ~GridGameListView();
 
 	virtual void onShow() override;
 
-	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
+	virtual void onThemeChanged(const std::shared_ptr<ThemeData> &theme) override;
 
-	virtual FileData* getCursor() override;
-	virtual void setCursor(FileData*, bool refreshListCursorPos = false) override;
+	virtual FileData *getCursor() override;
+	virtual void setCursor(FileData *, bool refreshListCursorPos = false) override;
 	virtual void setViewportTop(int index) override { ; }
 	virtual int getViewportTop() override { return -1; }
 
-	virtual bool input(InputConfig* config, Input input) override;
+	virtual bool input(InputConfig *config, Input input) override;
 
-	virtual const char* getName() const override { return "grid"; }
+	virtual const char *getName() const override { return "grid"; }
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
-	virtual void launch(FileData* game) override;
+	virtual void launch(FileData *game) override;
 
 	void onFocusLost(void) override;
 
@@ -37,15 +37,16 @@ protected:
 	virtual void update(int deltaTime) override;
 	virtual std::string getQuickSystemSelectRightButton() override;
 	virtual std::string getQuickSystemSelectLeftButton() override;
-	virtual void populateList(const std::vector<FileData*>& files) override;
-	virtual void remove(FileData* game, bool deleteFile, bool refreshView=true) override;
+	virtual void populateList(const std::vector<FileData *> &files) override;
+	virtual void remove(FileData *game, bool deleteFile, bool refreshView = true) override;
 	virtual void addPlaceholder();
+	virtual void launchGame(int countCredits, FileData *game) override;
 
-	ImageGridComponent<FileData*> mGrid;
+	ImageGridComponent<FileData *> mGrid;
 
 private:
 	void updateInfoPanel();
-	const std::string getImagePath(FileData* file);
+	const std::string getImagePath(FileData *file);
 
 	void initMDLabels();
 	void initMDValues();
@@ -53,7 +54,7 @@ private:
 	TextComponent mLblRating, mLblReleaseDate, mLblDeveloper, mLblPublisher, mLblGenre, mLblPlayers, mLblLastPlayed, mLblPlayCount;
 
 	ImageComponent mMarquee;
-	VideoComponent* mVideo;
+	VideoComponent *mVideo;
 	bool mVideoPlaying;
 	ImageComponent mImage;
 	RatingComponent mRating;
@@ -66,8 +67,8 @@ private:
 	TextComponent mPlayCount;
 	TextComponent mName;
 
-	std::vector<TextComponent*> getMDLabels();
-	std::vector<GuiComponent*> getMDValues();
+	std::vector<TextComponent *> getMDLabels();
+	std::vector<GuiComponent *> getMDValues();
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;

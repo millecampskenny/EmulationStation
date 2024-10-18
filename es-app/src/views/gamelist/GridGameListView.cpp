@@ -11,21 +11,21 @@
 #include "components/VideoPlayerComponent.h"
 #endif
 #include "components/VideoVlcComponent.h"
+#include "guis/GuiCountUser.h"
 
-GridGameListView::GridGameListView(Window* window, FileData* root) :
-	ISimpleGameListView(window, root),
-	mGrid(window), mMarquee(window),
-	mImage(window),
-	mVideo(nullptr),
-	mVideoPlaying(false),
-	mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window),
+GridGameListView::GridGameListView(Window *window, FileData *root) : ISimpleGameListView(window, root),
+																	 mGrid(window), mMarquee(window),
+																	 mImage(window),
+																	 mVideo(nullptr),
+																	 mVideoPlaying(false),
+																	 mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window),
 
-	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
-	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
+																	 mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
+																	 mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
 
-	mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window),
-	mGenre(window), mPlayers(window), mLastPlayed(window), mPlayCount(window),
-	mName(window)
+																	 mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window),
+																	 mGenre(window), mPlayers(window), mLastPlayed(window), mPlayCount(window),
+																	 mName(window)
 {
 	const float padding = 0.01f;
 
@@ -41,7 +41,8 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 
 	mGrid.setPosition(mSize.x() * 0.1f, mSize.y() * 0.1f);
 	mGrid.setDefaultZIndex(20);
-	mGrid.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
+	mGrid.setCursorChangedCallback([&](const CursorState & /*state*/)
+								   { updateInfoPanel(); });
 	addChild(&mGrid);
 
 	populateList(root->getChildrenListToDisplay());
@@ -81,7 +82,7 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 	addChild(&mName);
 
 	mDescContainer.setPosition(mSize.x() * padding, mSize.y() * 0.65f);
-	mDescContainer.setSize(mSize.x() * (0.50f - 2*padding), mSize.y() - mDescContainer.getPosition().y());
+	mDescContainer.setSize(mSize.x() * (0.50f - 2 * padding), mSize.y() - mDescContainer.getPosition().y());
 	mDescContainer.setAutoScroll(true);
 	mDescContainer.setDefaultZIndex(40);
 	addChild(&mDescContainer);
@@ -127,14 +128,14 @@ GridGameListView::~GridGameListView()
 	delete mVideo;
 }
 
-FileData* GridGameListView::getCursor()
+FileData *GridGameListView::getCursor()
 {
 	return mGrid.getSelected();
 }
 
-void GridGameListView::setCursor(FileData* file, bool refreshListCursorPos)
+void GridGameListView::setCursor(FileData *file, bool refreshListCursorPos)
 {
-	if(!mGrid.setCursor(file) && (!file->isPlaceHolder()))
+	if (!mGrid.setCursor(file) && (!file->isPlaceHolder()))
 	{
 		populateList(file->getParent()->getChildrenListToDisplay());
 		mGrid.setCursor(file);
@@ -151,15 +152,15 @@ std::string GridGameListView::getQuickSystemSelectLeftButton()
 	return "leftshoulder";
 }
 
-bool GridGameListView::input(InputConfig* config, Input input)
+bool GridGameListView::input(InputConfig *config, Input input)
 {
-	if(config->isMappedLike("left", input) || config->isMappedLike("right", input))
+	if (config->isMappedLike("left", input) || config->isMappedLike("right", input))
 		return GuiComponent::input(config, input);
 
 	return ISimpleGameListView::input(config, input);
 }
 
-const std::string GridGameListView::getImagePath(FileData* file)
+const std::string GridGameListView::getImagePath(FileData *file)
 {
 	ImageSource src = mGrid.getImageSource();
 
@@ -171,7 +172,7 @@ const std::string GridGameListView::getImagePath(FileData* file)
 	return file->getThumbnailPath();
 }
 
-void GridGameListView::populateList(const std::vector<FileData*>& files)
+void GridGameListView::populateList(const std::vector<FileData *> &files)
 {
 	mGrid.clear();
 	mHeaderText.setText(mRoot->getSystem()->getFullName());
@@ -188,7 +189,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 	}
 }
 
-void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
+void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData> &theme)
 {
 	ISimpleGameListView::onThemeChanged(theme);
 
@@ -201,28 +202,25 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION | VISIBLE);
 
 	initMDLabels();
-	std::vector<TextComponent*> labels = getMDLabels();
+	std::vector<TextComponent *> labels = getMDLabels();
 	assert(labels.size() == 8);
-	const char* lblElements[8] = {
-			"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher",
-			"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"
-	};
+	const char *lblElements[8] = {
+		"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher",
+		"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"};
 
-	for(unsigned int i = 0; i < labels.size(); i++)
+	for (unsigned int i = 0; i < labels.size(); i++)
 	{
 		labels[i]->applyTheme(theme, getName(), lblElements[i], ALL);
 	}
 
-
 	initMDValues();
-	std::vector<GuiComponent*> values = getMDValues();
+	std::vector<GuiComponent *> values = getMDValues();
 	assert(values.size() == 8);
-	const char* valElements[8] = {
-			"md_rating", "md_releasedate", "md_developer", "md_publisher",
-			"md_genre", "md_players", "md_lastplayed", "md_playcount"
-	};
+	const char *valElements[8] = {
+		"md_rating", "md_releasedate", "md_developer", "md_publisher",
+		"md_genre", "md_players", "md_lastplayed", "md_playcount"};
 
-	for(unsigned int i = 0; i < values.size(); i++)
+	for (unsigned int i = 0; i < values.size(); i++)
 	{
 		values[i]->applyTheme(theme, getName(), valElements[i], ALL ^ ThemeFlags::TEXT);
 	}
@@ -232,7 +230,7 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	mDescription.applyTheme(theme, getName(), "md_description", ALL ^ (POSITION | ThemeFlags::SIZE | ThemeFlags::ORIGIN | TEXT | ROTATION));
 
 	// Repopulate list in case new theme is displaying a different image.  Preserve selection.
-	FileData* file = mGrid.getSelected();
+	FileData *file = mGrid.getSelected();
 	populateList(mRoot->getChildrenListToDisplay());
 	mGrid.setCursor(file);
 
@@ -241,7 +239,7 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 void GridGameListView::initMDLabels()
 {
-	std::vector<TextComponent*> components = getMDLabels();
+	std::vector<TextComponent *> components = getMDLabels();
 
 	const unsigned int colCount = 2;
 	const unsigned int rowCount = (int)(components.size() / 2);
@@ -251,16 +249,18 @@ void GridGameListView::initMDLabels()
 	const float colSize = (mSize.x() * 0.48f) / colCount;
 	const float rowPadding = 0.01f * mSize.y();
 
-	for(unsigned int i = 0; i < components.size(); i++)
+	for (unsigned int i = 0; i < components.size(); i++)
 	{
 		const unsigned int row = i % rowCount;
 		Vector3f pos(0.0f, 0.0f, 0.0f);
-		if(row == 0)
+		if (row == 0)
 		{
 			pos = start + Vector3f(colSize * (i / rowCount), 0, 0);
-		}else{
+		}
+		else
+		{
 			// work from the last component
-			GuiComponent* lc = components[i-1];
+			GuiComponent *lc = components[i - 1];
 			pos = lc->getPosition() + Vector3f(0, lc->getSize().y() + rowPadding, 0);
 		}
 
@@ -272,8 +272,8 @@ void GridGameListView::initMDLabels()
 
 void GridGameListView::initMDValues()
 {
-	std::vector<TextComponent*> labels = getMDLabels();
-	std::vector<GuiComponent*> values = getMDValues();
+	std::vector<TextComponent *> labels = getMDLabels();
+	std::vector<GuiComponent *> values = getMDValues();
 
 	std::shared_ptr<Font> defaultFont = Font::get(FONT_SIZE_SMALL);
 	mRating.setSize(defaultFont->getHeight() * 5.0f, (float)defaultFont->getHeight());
@@ -288,7 +288,7 @@ void GridGameListView::initMDValues()
 	float bottom = 0.0f;
 
 	const float colSize = (mSize.x() * 0.48f) / 2;
-	for(unsigned int i = 0; i < labels.size(); i++)
+	for (unsigned int i = 0; i < labels.size(); i++)
 	{
 		const float heightDiff = (labels[i]->getSize().y() - values[i]->getSize().y()) / 2;
 		values[i]->setPosition(labels[i]->getPosition() + Vector3f(labels[i]->getSize().x(), heightDiff, 0));
@@ -296,7 +296,7 @@ void GridGameListView::initMDValues()
 		values[i]->setDefaultZIndex(40);
 
 		float testBot = values[i]->getPosition().y() + values[i]->getSize().y();
-		if(testBot > bottom)
+		if (testBot > bottom)
 			bottom = testBot;
 	}
 
@@ -306,18 +306,20 @@ void GridGameListView::initMDValues()
 
 void GridGameListView::updateInfoPanel()
 {
-	FileData* file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
+	FileData *file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
 
 	bool fadingOut;
-	if(file == NULL)
+	if (file == NULL)
 	{
 		mVideo->setVideo("");
 		mVideo->setImage("");
 		mVideoPlaying = false;
 
-		//mDescription.setText("");
+		// mDescription.setText("");
 		fadingOut = true;
-	}else{
+	}
+	else
+	{
 		if (!mVideo->setVideo(file->getVideoPath()))
 		{
 			mVideo->setDefaultVideo();
@@ -339,7 +341,7 @@ void GridGameListView::updateInfoPanel()
 		mPlayers.setValue(file->metadata.get("players"));
 		mName.setValue(file->metadata.get("name"));
 
-		if(file->getType() == GAME)
+		if (file->getType() == GAME)
 		{
 			mLastPlayed.setValue(file->metadata.get("lastplayed"));
 			mPlayCount.setValue(file->metadata.get("playcount"));
@@ -348,28 +350,28 @@ void GridGameListView::updateInfoPanel()
 		fadingOut = false;
 	}
 
-	std::vector<GuiComponent*> comps = getMDValues();
+	std::vector<GuiComponent *> comps = getMDValues();
 	comps.push_back(&mDescription);
 	comps.push_back(&mName);
 	comps.push_back(&mMarquee);
 	comps.push_back(mVideo);
 	comps.push_back(&mImage);
-	std::vector<TextComponent*> labels = getMDLabels();
+	std::vector<TextComponent *> labels = getMDLabels();
 	comps.insert(comps.cend(), labels.cbegin(), labels.cend());
 
-	for(auto it = comps.cbegin(); it != comps.cend(); it++)
+	for (auto it = comps.cbegin(); it != comps.cend(); it++)
 	{
-		GuiComponent* comp = *it;
+		GuiComponent *comp = *it;
 		// an animation is playing
 		//   then animate if reverse != fadingOut
 		// an animation is not playing
 		//   then animate if opacity != our target opacity
-		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
-		   (!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
+		if ((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
+			(!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
 		{
 			auto func = [comp](float t)
 			{
-				comp->setOpacity((unsigned char)(Math::lerp(0.0f, 1.0f, t)*255));
+				comp->setOpacity((unsigned char)(Math::lerp(0.0f, 1.0f, t) * 255));
 			};
 			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
 		}
@@ -379,53 +381,83 @@ void GridGameListView::updateInfoPanel()
 void GridGameListView::addPlaceholder()
 {
 	// empty grid - add a placeholder
-	FileData* placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem()->getSystemEnvData(), this->mRoot->getSystem());
+	FileData *placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem()->getSystemEnvData(), this->mRoot->getSystem());
 	mGrid.add(placeholder->getName(), "", placeholder);
 }
 
-void GridGameListView::launch(FileData* game)
+void GridGameListView::launch(FileData *game)
 {
-	if(getCredit() == 0){
-		return;
-	} else {
-		decrementCredit();
-		ViewController::get()->reloadAll();
+	FileData *file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
+	int credit = getCredit();
+	int countPlayer = 1;
+	try
+	{
+		if (file != NULL)
+			countPlayer = std::stoi(file->metadata.get("players"));
 	}
-	float screenWidth = (float) Renderer::getScreenWidth();
-	float screenHeight = (float) Renderer::getScreenHeight();
+	catch (const std::invalid_argument &e)
+	{
+		countPlayer = 1;
+	}
+	catch (const std::out_of_range &e)
+	{
+		countPlayer = 1;
+	}
+	if (credit == 0)
+	{
+		return;
+	}
+
+	if (credit == 1 || countPlayer == 1)
+	{
+		launchGame(1, game);
+	}
+	else
+	{
+		mWindow->pushGui(new GuiCountUser(mWindow, credit, countPlayer, game, [this, game](int countGame)
+										  { launchGame(countGame, game); }));
+	}
+}
+
+void GridGameListView::launchGame(int countCredits, FileData *game)
+{
+	decrementCredit(countCredits);
+	ViewController::get()->reloadAll();
+
+	float screenWidth = (float)Renderer::getScreenWidth();
+	float screenHeight = (float)Renderer::getScreenHeight();
 
 	Vector3f target(screenWidth / 2.0f, screenHeight / 2.0f, 0);
 
-	if(mMarquee.hasImage() &&
+	if (mMarquee.hasImage() &&
 		(mMarquee.getPosition().x() < screenWidth && mMarquee.getPosition().x() > 0.0f &&
 		 mMarquee.getPosition().y() < screenHeight && mMarquee.getPosition().y() > 0.0f))
 	{
 		target = Vector3f(mMarquee.getCenter().x(), mMarquee.getCenter().y(), 0);
 	}
-	else if(mImage.hasImage() &&
-		(mImage.getPosition().x() < screenWidth && mImage.getPosition().x() > 2.0f &&
-		 mImage.getPosition().y() < screenHeight && mImage.getPosition().y() > 2.0f))
+	else if (mImage.hasImage() &&
+			 (mImage.getPosition().x() < screenWidth && mImage.getPosition().x() > 2.0f &&
+			  mImage.getPosition().y() < screenHeight && mImage.getPosition().y() > 2.0f))
 	{
 		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);
 	}
-	else if(mVideo->getPosition().x() < screenWidth && mVideo->getPosition().x() > 0.0f &&
-		 mVideo->getPosition().y() < screenHeight && mVideo->getPosition().y() > 0.0f)
+	else if (mVideo->getPosition().x() < screenWidth && mVideo->getPosition().x() > 0.0f &&
+			 mVideo->getPosition().y() < screenHeight && mVideo->getPosition().y() > 0.0f)
 	{
 		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
 	}
 
 	ViewController::get()->launch(game, target);
-
 }
 
 void GridGameListView::remove(FileData *game, bool deleteFile, bool refreshView)
 {
 	if (deleteFile)
-		Utils::FileSystem::removeFile(game->getPath());  // actually delete the file on the filesystem
-	FileData* parent = game->getParent();
-	if (getCursor() == game)                     // Select next element in list, or prev if none
+		Utils::FileSystem::removeFile(game->getPath()); // actually delete the file on the filesystem
+	FileData *parent = game->getParent();
+	if (getCursor() == game) // Select next element in list, or prev if none
 	{
-		std::vector<FileData*> siblings = parent->getChildrenListToDisplay();
+		std::vector<FileData *> siblings = parent->getChildrenListToDisplay();
 		auto gameIter = std::find(siblings.cbegin(), siblings.cend(), game);
 		int gamePos = (int)std::distance(siblings.cbegin(), gameIter);
 		if (gameIter != siblings.cend())
@@ -433,25 +465,27 @@ void GridGameListView::remove(FileData *game, bool deleteFile, bool refreshView)
 			if ((gamePos + 1) < (int)siblings.size())
 			{
 				setCursor(siblings.at(gamePos + 1));
-			} else if ((gamePos - 1) > 0) {
+			}
+			else if ((gamePos - 1) > 0)
+			{
 				setCursor(siblings.at(gamePos - 1));
 			}
 		}
 	}
 	mGrid.remove(game);
-	if(mGrid.size() == 0)
+	if (mGrid.size() == 0)
 	{
 		addPlaceholder();
 	}
-	delete game;                                 // remove before repopulating (removes from parent)
+	delete game; // remove before repopulating (removes from parent)
 
-	if(refreshView)
-		onFileChanged(parent, FILE_REMOVED);     // update the view, with game removed
+	if (refreshView)
+		onFileChanged(parent, FILE_REMOVED); // update the view, with game removed
 }
 
-std::vector<TextComponent*> GridGameListView::getMDLabels()
+std::vector<TextComponent *> GridGameListView::getMDLabels()
 {
-	std::vector<TextComponent*> ret;
+	std::vector<TextComponent *> ret;
 	ret.push_back(&mLblRating);
 	ret.push_back(&mLblReleaseDate);
 	ret.push_back(&mLblDeveloper);
@@ -463,9 +497,9 @@ std::vector<TextComponent*> GridGameListView::getMDLabels()
 	return ret;
 }
 
-std::vector<GuiComponent*> GridGameListView::getMDValues()
+std::vector<GuiComponent *> GridGameListView::getMDValues()
 {
-	std::vector<GuiComponent*> ret;
+	std::vector<GuiComponent *> ret;
 	ret.push_back(&mRating);
 	ret.push_back(&mReleaseDate);
 	ret.push_back(&mDeveloper);
@@ -481,16 +515,16 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 
-	if(Settings::getInstance()->getBool("QuickSystemSelect"))
+	if (Settings::getInstance()->getBool("QuickSystemSelect"))
 		prompts.push_back(HelpPrompt("lr", "system"));
 	prompts.push_back(HelpPrompt("up/down/left/right", "choose"));
 	prompts.push_back(HelpPrompt("a", "launch"));
 	prompts.push_back(HelpPrompt("b", "back"));
-	if(!UIModeController::getInstance()->isUIModeKid())
+	if (!UIModeController::getInstance()->isUIModeKid())
 		prompts.push_back(HelpPrompt("select", "options"));
-	if(mRoot->getSystem()->isGameSystem())
+	if (mRoot->getSystem()->isGameSystem())
 		prompts.push_back(HelpPrompt("x", "random"));
-	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
+	if (mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{
 		std::string prompt = CollectionSystemManager::get()->getEditingCollection();
 		prompts.push_back(HelpPrompt("y", prompt));
@@ -510,6 +544,7 @@ void GridGameListView::onShow()
 	updateInfoPanel();
 }
 
-void GridGameListView::onFocusLost() {
+void GridGameListView::onFocusLost()
+{
 	mDescContainer.reset();
 }
