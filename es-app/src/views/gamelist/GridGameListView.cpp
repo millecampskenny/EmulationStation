@@ -11,6 +11,7 @@
 #include "components/VideoPlayerComponent.h"
 #endif
 #include "components/VideoVlcComponent.h"
+#include "guis/GuiCountUser.h"
 
 GridGameListView::GridGameListView(Window* window, FileData* root) :
 	ISimpleGameListView(window, root),
@@ -385,12 +386,39 @@ void GridGameListView::addPlaceholder()
 
 void GridGameListView::launch(FileData* game)
 {
-	if(getCredit() == 0){
+	FileData* file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
+	int credit = getCredit();
+	int countPlayer = 1;
+	try {
+		if(file != NULL)
+		countPlayer = std::stoi(file->metadata.get("players"));
+	}catch (const std::invalid_argument& e) {
+        countPlayer = 1;
+    } catch (const std::out_of_range& e) {
+        countPlayer = 1;
+    }
+	if(credit == 0){
 		return;
+	} 
+
+	if(credit == 1 || countPlayer == 1) {
+		launchGame(1, game);
 	} else {
-		decrementCredit();
-		ViewController::get()->reloadAll();
+		mWindow->pushGui(new GuiCountUser(mWindow, credit, countPlayer, game, [this, game](int countGame) {
+            launchGame(countGame, game);
+        }));
 	}
+	
+
+}
+
+void GridGameListView::launchGame(int countCredits, FileData* game)
+{
+	for(int i=0;i<countCredits;i++){
+		decrementCredit();
+	}
+	ViewController::get()->reloadAll();
+
 	float screenWidth = (float) Renderer::getScreenWidth();
 	float screenHeight = (float) Renderer::getScreenHeight();
 
@@ -415,7 +443,6 @@ void GridGameListView::launch(FileData* game)
 	}
 
 	ViewController::get()->launch(game, target);
-
 }
 
 void GridGameListView::remove(FileData *game, bool deleteFile, bool refreshView)
