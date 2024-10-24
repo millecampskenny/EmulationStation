@@ -270,13 +270,18 @@ void FileData::sort(ComparisonFunction& comparator, bool ascending)
 	}
 }
 
+void FileData::creditGame(int countCredit)
+{
+
+}
+
 void FileData::sort(const SortType& type)
 {
 	sort(*type.comparisonFunction, type.ascending);
 	mSortDesc = type.description;
 }
 
-void FileData::launchGame(Window* window)
+void FileData::launchGame(Window* window, int countCredit)
 {
 	LOG(LogInfo) << "Attempting to launch game...";
 
@@ -325,6 +330,8 @@ void FileData::launchGame(Window* window)
 	CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
 
 	gameToUpdate->mSystem->onMetaDataSavePoint();
+
+	creditGame(countCredit);
 }
 
 CollectionFileData::CollectionFileData(FileData* file, SystemData* system)

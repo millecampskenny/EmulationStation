@@ -164,7 +164,7 @@ void BasicGameListView::launchGame(int countCredits, FileData *game)
 {
 	decrementCredit(countCredits);
 	ViewController::get()->reloadAll();
-	ViewController::get()->launch(game);
+	ViewController::get()->launch(game, countCredits);
 }
 
 void BasicGameListView::remove(FileData *game, bool deleteFile, bool refreshView)

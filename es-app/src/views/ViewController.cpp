@@ -255,7 +255,7 @@ void ViewController::onFileChanged(FileData* file, FileChangeType change)
 		it->second->onFileChanged(file, change);
 }
 
-void ViewController::launch(FileData* game, Vector3f center)
+void ViewController::launch(FileData* game, int countCredit, Vector3f center)
 {
 	if(game->getType() != GAME)
 	{
@@ -282,9 +282,9 @@ void ViewController::launch(FileData* game, Vector3f center)
 		auto fadeFunc = [this](float t) {
 			mFadeOpacity = Math::lerp(0.0f, 1.0f, t);
 		};
-		setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game, fadeFunc]
+		setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game, fadeFunc, countCredit]
 		{
-			game->launchGame(mWindow);
+			game->launchGame(mWindow, countCredit);
 			setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game] { mLockInput = false; }, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
 			if (mCurrentView) {
@@ -294,9 +294,9 @@ void ViewController::launch(FileData* game, Vector3f center)
 		});
 	} else if (transition_style == "slide"){
 		// move camera to zoom in on center + fade out, launch game, come back in
-		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 1500), 0, [this, origCamera, center, game]
+		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 1500), 0, [this, origCamera, center, game, countCredit]
 		{
-			game->launchGame(mWindow);
+			game->launchGame(mWindow, countCredit);
 			mCamera = origCamera;
 			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this, game] { mLockInput = false; }, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
@@ -306,9 +306,9 @@ void ViewController::launch(FileData* game, Vector3f center)
 			}
 		});
 	} else { // instant
-		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game]
+		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, countCredit]
 		{
-			game->launchGame(mWindow);
+			game->launchGame(mWindow, countCredit);
 			mCamera = origCamera;
 			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, game] { mLockInput = false; }, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);

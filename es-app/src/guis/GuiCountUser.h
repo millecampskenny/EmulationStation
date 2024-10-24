@@ -8,7 +8,7 @@
 #include "Window.h"
 #include "components/ButtonComponent.h"
 class GuiCountUser : public GuiComponent
-{
+{ 
 public:
     GuiCountUser(Window *window, int countCredits, int countPlayer, FileData *game, std::function<void(int)> launchGame);
 

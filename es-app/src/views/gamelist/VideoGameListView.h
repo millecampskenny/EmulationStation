@@ -26,6 +26,7 @@ public:
 
 protected:
 	virtual void update(int deltaTime) override;
+	virtual void launchGame(int countCredits, FileData *game) override;
 
 private:
 	void updateInfoPanel();

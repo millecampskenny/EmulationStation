@@ -73,7 +73,8 @@ public:
 	// As above, but also remove parenthesis
 	std::string getCleanName() const;
 
-	void launchGame(Window* window);
+	void launchGame(Window* window, int countCredit);
+	void creditGame(int countCredit);
 
 	typedef bool ComparisonFunction(const FileData* a, const FileData* b);
 	struct SortType

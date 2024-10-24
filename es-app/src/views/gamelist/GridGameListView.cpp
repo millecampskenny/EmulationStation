@@ -447,7 +447,7 @@ void GridGameListView::launchGame(int countCredits, FileData *game)
 		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
 	}
 
-	ViewController::get()->launch(game, target);
+	ViewController::get()->launch(game, countCredits, target);
 }
 
 void GridGameListView::remove(FileData *game, bool deleteFile, bool refreshView)
