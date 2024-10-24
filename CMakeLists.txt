@@ -174,7 +174,6 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 
-
 #-------------------------------------------------------------------------------
 #add include directories
 set(COMMON_INCLUDE_DIRS
@@ -284,3 +283,4 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 add_subdirectory("external")
 add_subdirectory("es-core")
 add_subdirectory("es-app")
+

@@ -133,6 +133,14 @@ include_directories(${COMMON_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_executable(emulationstation ${ES_SOURCES} ${ES_HEADERS})
 target_link_libraries(emulationstation ${COMMON_LIBRARIES} es-core)
 
+cmake_policy(SET CMP0079 NEW)
+find_package(X11 REQUIRED)
+find_library(XTEST_LIB NAMES Xtst)
+
+if (XTEST_LIB)
+    target_link_libraries(emulationstation ${X11_LIBRARIES} ${XTEST_LIB})
+endif()
+
 # special properties for Windows builds
 if(MSVC)
     # Always compile with the "WINDOWS" subsystem to avoid console window flashing at startup

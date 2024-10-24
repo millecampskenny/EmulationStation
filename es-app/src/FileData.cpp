@@ -15,7 +15,16 @@
 #include "SystemData.h"
 #include "VolumeControl.h"
 #include "Window.h"
+#define Window XWindow
+#define Font XFont
+#include <X11/Xlib.h>
+#undef Window
+#undef Font
 #include <assert.h>
+#include <X11/extensions/XTest.h>
+#include <thread>  // Pour std::thread
+#include <chrono>  // Pour std::chrono::seconds
+#include <unistd.h> // Pour usleep
 
 FileData::FileData(FileType type, const std::string& path, SystemEnvironmentData* envData, SystemData* system)
 	: mType(type), mPath(path), mSystem(system), mEnvData(envData), mSourceFileData(NULL), mParent(NULL), metadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -272,7 +281,34 @@ void FileData::sort(ComparisonFunction& comparator, bool ascending)
 
 void FileData::creditGame(int countCredit)
 {
+ 	  // Attendre 30 secondes
+    std::this_thread::sleep_for(std::chrono::seconds(30));
 
+    // Ouvrir une connexion à l'affichage X
+    Display* display = XOpenDisplay(NULL);
+    if (!display) {
+        LOG(LogError) << "Cannot open display!";
+        return; // Gérer l'erreur d'une autre manière si nécessaire
+    }
+
+    // Obtenir le keycode pour la touche 'Escape'
+    KeyCode escapeKeyCode = XKeysymToKeycode(display, XStringToKeysym("Escape"));
+    if (escapeKeyCode == 0) {
+        LOG(LogError) << "Keycode for Escape not found!";
+        XCloseDisplay(display);
+        return; // Gérer l'erreur d'une autre manière si nécessaire
+    }
+
+    // Simuler l'appui sur la touche 'Escape'
+    XTestFakeKeyEvent(display, escapeKeyCode, True, 0);
+    XFlush(display);
+
+    // Simuler le relâchement de la touche 'Escape'
+    XTestFakeKeyEvent(display, escapeKeyCode, False, 0);
+    XFlush(display);
+
+    // Fermer la connexion à l'affichage X
+    XCloseDisplay(display);
 }
 
 void FileData::sort(const SortType& type)
@@ -303,6 +339,11 @@ void FileData::launchGame(Window* window, int countCredit)
 
 	Scripting::fireEvent("game-start", rom, basename, name);
 
+	// Créer un nouveau thread pour exécuter creditGame
+	std::thread creditThread([this, countCredit]() {
+		creditGame(countCredit);
+	});
+
 	LOG(LogInfo) << "	" << command;
 	int exitCode = runSystemCommand(command);
 
@@ -331,7 +372,6 @@ void FileData::launchGame(Window* window, int countCredit)
 
 	gameToUpdate->mSystem->onMetaDataSavePoint();
 
-	creditGame(countCredit);
 }
 
 CollectionFileData::CollectionFileData(FileData* file, SystemData* system)
