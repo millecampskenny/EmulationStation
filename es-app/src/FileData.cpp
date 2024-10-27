@@ -336,6 +336,7 @@ void FileData::launchGame(Window* window, int countCredit)
 	command = Utils::String::replace(command, "%ROM%", rom);
 	command = Utils::String::replace(command, "%BASENAME%", basename);
 	command = Utils::String::replace(command, "%ROM_RAW%", rom_raw);
+	command += " coin_impulse " + std::to_string(countCredit);
 
 	Scripting::fireEvent("game-start", rom, basename, name);
 
