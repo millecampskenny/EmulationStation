@@ -52,6 +52,7 @@ private:
 	TextComponent mDescription;
 
 	TextComponent mCredits;
+	TextComponent mPrice;
 };
 
 #endif // ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H

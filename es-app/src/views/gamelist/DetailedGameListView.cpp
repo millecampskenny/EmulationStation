@@ -8,7 +8,7 @@
 #include "guis/GuiCountUser.h"
 
 DetailedGameListView::DetailedGameListView(Window *window, FileData *root) : BasicGameListView(window, root),
-																			 mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window), mCredits(window),
+																			 mDescContainer(window, DESCRIPTION_SCROLL_DELAY), mDescription(window), mCredits(window),mPrice(window),
 																			 mThumbnail(window),
 																			 mMarquee(window),
 																			 mImage(window),
@@ -106,6 +106,15 @@ DetailedGameListView::DetailedGameListView(Window *window, FileData *root) : Bas
 	mCredits.setHorizontalAlignment(ALIGN_LEFT);
 	addChild(&mCredits);
 
+
+	mPrice.setPosition(mSize.x(), mSize.y());
+	mPrice.setDefaultZIndex(40);
+	mPrice.setColor(0x86AA55FF);
+	mPrice.setFont(Font::get(FONT_SIZE_LARGE));
+	mPrice.setHorizontalAlignment(ALIGN_LEFT);
+	mPrice.setText("Prix: 1€/credit");
+	addChild(&mPrice);
+
 	initMDLabels();
 	initMDValues();
 	updateInfoPanel();
@@ -122,6 +131,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData> &them
 	mName.applyTheme(theme, getName(), "md_name", ALL);
 
 	mCredits.applyTheme(theme, getName(), "md_credits", ALL);
+	mPrice.applyTheme(theme, getName(), "md_price", ALL);
 
 	initMDLabels();
 	std::vector<TextComponent *> labels = getMDLabels();
@@ -265,6 +275,7 @@ void DetailedGameListView::updateInfoPanel()
 	comps.push_back(&mImage);
 	comps.push_back(&mDescription);
 	comps.push_back(&mCredits);
+	comps.push_back(&mPrice);
 	comps.push_back(&mName);
 	std::vector<TextComponent *> labels = getMDLabels();
 	comps.insert(comps.cend(), labels.cbegin(), labels.cend());
