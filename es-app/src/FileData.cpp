@@ -25,6 +25,8 @@
 #include <thread>	// Pour std::thread
 #include <chrono>	// Pour std::chrono::seconds
 #include <unistd.h> // Pour usleep
+#include <fstream>	// Pour std::ofstream
+#include <iostream> // Pour std::cout et std::cerr
 
 FileData::FileData(FileType type, const std::string &path, SystemEnvironmentData *envData, SystemData *system)
 	: mType(type), mPath(path), mSystem(system), mEnvData(envData), mSourceFileData(NULL), mParent(NULL), metadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -320,9 +322,78 @@ void FileData::sort(const SortType &type)
 	mSortDesc = type.description;
 }
 
+void FileData::writeInsertCoinConfig(int playerNumber, int coinStatus)
+{
+	// Chemin vers le fichier retroarch.cfg
+	std::string filePath = "/opt/retropie/configs/all/retroarch.cfg";
+	// std::string filePath = "~/.config/retroarch/retroarch.cfg";
+
+	std::ifstream configFileIn(filePath);
+	if (!configFileIn.is_open())
+	{
+		std::cerr << "Impossible d'ouvrir le fichier en lecture: " << filePath << std::endl;
+		return;
+	}
+
+	// Lire tout le fichier dans une liste de chaînes de caractères
+	std::vector<std::string> fileLines;
+	std::string line;
+	while (std::getline(configFileIn, line))
+	{
+		fileLines.push_back(line);
+	}
+	configFileIn.close();
+
+	// Générer la clé et la valeur
+	std::string key = "input_player" + std::to_string(playerNumber) + "_insert_coin";
+	std::string value = (coinStatus > 0) ? "true" : "false";
+
+	bool found = false;
+
+	// Vérifier si la ligne existe déjà dans le fichier
+	for (size_t i = 0; i < fileLines.size(); ++i)
+	{
+		if (fileLines[i].find(key) != std::string::npos)
+		{
+			// Modifier la ligne existante
+			fileLines[i] = key + " = \"" + value + "\"";
+			found = true;
+			break;
+		}
+	}
+
+	// Si la ligne n'existe pas, l'ajouter
+	if (!found)
+	{
+		fileLines.push_back(key + " = \"" + value + "\"");
+	}
+
+	// Réécrire le fichier avec les nouvelles lignes
+	std::ofstream configFileOut(filePath, std::ios::trunc);
+	if (!configFileOut.is_open())
+	{
+		std::cerr << "Impossible d'ouvrir le fichier en écriture: " << filePath << std::endl;
+		return;
+	}
+
+	for (const auto &fileLine : fileLines)
+	{
+		configFileOut << fileLine << "\n";
+	}
+
+	configFileOut.close();
+
+	std::cout << "Configuration mise à jour : " << key << " = " << value << std::endl;
+}
+
 void FileData::launchGame(Window *window, int countCredit)
 {
 	LOG(LogInfo) << "Attempting to launch game...";
+
+	for (int player = 1; player <= 4; ++player)
+	{
+		writeInsertCoinConfig(player, player <= countCredit ? 1 : 0);
+	}
 
 	AudioManager::getInstance()->deinit();
 	VolumeControl::getInstance()->deinit();
